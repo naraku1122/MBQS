@@ -1,5 +1,13 @@
 package com.project.mbqs;
 
+import static com.project.mbqs.MyVariables.HOSTQID;
+import static com.project.mbqs.MyVariables.MYEMAIL;
+import static com.project.mbqs.MyVariables.MYPREFERENCES;
+import static com.project.mbqs.MyVariables.MYUSERNAME;
+import static com.project.mbqs.MyVariables.TAG;
+import static com.project.mbqs.MyVariables.editor;
+import static com.project.mbqs.MyVariables.sharedPreferences;
+
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -17,7 +25,6 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
-import com.firebase.ui.auth.AuthMethodPickerLayout;
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract;
 import com.firebase.ui.auth.IdpResponse;
@@ -26,17 +33,15 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.ActionCodeSettings;
+import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
-
 import com.google.firebase.auth.FirebaseUser;
-import com.project.mbqs.utils.*;
-import com.project.mbqs.host.*;
-import com.project.mbqs.join.*;
-
-import static com.project.mbqs.MyVariables.*;
+import com.project.mbqs.host.HostingDetailsActivity;
+import com.project.mbqs.join.ScanTabsActivity;
+import com.project.mbqs.utils.MyUtilsOperation;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener, View.OnClickListener{
@@ -46,6 +51,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     private FirebaseAuth auth;
     private Intent intent;
     private Toolbar toolbar;
+
+    private String emailAdd, password;
 
     private void initilizeSharedPrefs(){
         if(null==sharedPreferences) {
@@ -78,29 +85,22 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
     }
 
-    private void signIn(){
-
-    }
-
-
     //Sign-out Code
     private void signOut(){
-        AuthUI.getInstance().signOut(this).addOnCompleteListener(new OnCompleteListener<Void>() {
-            @Override
-            public void onComplete(@NonNull Task<Void> task) {
-                Log.i(TAG,"Signing Off...");
-                editor.putString(MyVariables.MYEMAIL,null);
-                editor.putString(HOSTQID,null);
-                editor.putString(MyVariables.MYUSERNAME,null);
-                editor.commit();
-                startActivity(intent);
-                finish();
-            }
+        AuthUI.getInstance().signOut(this).addOnCompleteListener(task -> {
+            Log.i(TAG,"Signing Off...");
+            editor.putString(MyVariables.MYEMAIL,null);
+            editor.putString(HOSTQID,null);
+            editor.putString(MyVariables.MYUSERNAME,null);
+            editor.commit();
+            startActivity(intent);
+            finish();
         });
 
     }
 
     public void setSignInLauncher() {
+
         List<AuthUI.IdpConfig> providers = Arrays.asList(
                 new AuthUI.IdpConfig.EmailBuilder().build(),
                 new AuthUI.IdpConfig.GoogleBuilder().build());
@@ -111,17 +111,21 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 .setAvailableProviders(providers)
                 .setLogo(R.mipmap.queue_round)      // Set logo drawable
                 .setTheme(R.style.Theme_MBQS)      // Set theme
+                .setIsSmartLockEnabled(false)
                 .build();
-
-        //startActivity(signInIntent);
         signInLauncher.launch(signInIntent);
     }
 
+    // See: https://developer.android.com/training/basics/intents/result
     private final ActivityResultLauncher<Intent> signInLauncher = registerForActivityResult(
             new FirebaseAuthUIActivityResultContract(),
-            result -> {
-                onSignInResult(result);
+            new ActivityResultCallback<FirebaseAuthUIAuthenticationResult>() {
+                @Override
+                public void onActivityResult(FirebaseAuthUIAuthenticationResult result) {
+                    onSignInResult(result);
+                }
             }
+
     );
 
     // [START auth_fui_result]
@@ -129,20 +133,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         IdpResponse response = result.getIdpResponse();
         if (result.getResultCode() == RESULT_OK) {
             // Successfully signed in
-            FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+            FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
 
-            /*
-            auth.signInWithEmailAndPassword(new OnCompleteListener<>() {
-                @Override
-                public void onComplete(@NonNull Task task) {
-                    if(task.isSuccessful()){
-
-                    }
-                }
-            });
-
-             */
-            // ...
         } else {
             // Sign in failed. If response is null the user canceled the
             // sign-in flow using the back button. Otherwise check
@@ -168,17 +160,16 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
         if(auth.getCurrentUser() != null){
             //Already Signed In
-            editor.putString(HOSTQID,MyUtilsOperation.encodeEmail(auth.getCurrentUser().getEmail()));
-            editor.putString(MYEMAIL,auth.getCurrentUser().getEmail());
-            editor.putString(MYUSERNAME,auth.getCurrentUser().getDisplayName());
+            editor.putString(HOSTQID, MyUtilsOperation.encodeEmail(auth.getCurrentUser().getEmail()));
+            editor.putString(MYEMAIL, auth.getCurrentUser().getEmail());
+            editor.putString(MYUSERNAME, auth.getCurrentUser().getDisplayName());
             editor.commit();
             tv_status.setText(getResources().getText(R.string.welcome) + auth.getCurrentUser().getDisplayName());
         }
         else{
             //Yet to sign in
             // Choose authentication providers
-            signIn();
-
+            setSignInLauncher();
         }
 
     }
@@ -202,14 +193,16 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         // Result returned from launching the Intent from GoogleSignInApi.getSignInIntent(...);
         if (requestCode == RC_SIGN_IN) {
             if(resultCode == RESULT_OK){
-                Toast.makeText(this,"Login email : " + auth.getCurrentUser().getEmail(),Toast.LENGTH_SHORT).show();
+                Toast.makeText(this,"Login Email : " + auth.getCurrentUser().getEmail(),Toast.LENGTH_SHORT).show();
                 editor.putString(HOSTQID, MyUtilsOperation.encodeEmail(auth.getCurrentUser().getEmail()));
                 editor.putString(MyVariables.MYEMAIL,auth.getCurrentUser().getEmail());
                 editor.putString(MyVariables.MYUSERNAME,auth.getCurrentUser().getDisplayName());
                 editor.commit();
                 Log.d(TAG,"QID : "+auth.getCurrentUser().getEmail().replaceAll("[^a-z0-9]", ""));
                 tv_status.setText(getResources().getText(R.string.welcome) + auth.getCurrentUser().getDisplayName());
-            }else{
+            }
+            else
+            {
                 Log.d(TAG,"User Not Authenticated");
             }
         }
