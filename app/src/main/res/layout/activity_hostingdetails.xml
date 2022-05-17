@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/fui_bgFacebook"
+    tools:context=".host.HostingDetailsActivity">
+
+    <include
+        android:id="@+id/toolbar_hdetails"
+        layout="@layout/toolbar"/>
+
+    <EditText
+        android:id="@+id/et_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/enter_queue_name"
+        android:textAlignment="center"
+        android:layout_marginTop="30dp" />
+
+    <EditText
+        android:id="@+id/et_desc"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:hint="@string/enter_queue_description"
+        android:textAlignment="center" />
+
+    <EditText
+        android:id="@+id/et_max"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="number"
+        android:hint="@string/set_max_queue_limit"
+        android:ems="10"
+        android:textAlignment="center"
+        android:layout_gravity="center_horizontal" />
+
+    <Button
+        android:id="@+id/b_hostQueue"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/host_queue"
+        android:padding="20dp"
+        android:layout_gravity="center_horizontal" />
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@mipmap/queue_bg"
+        android:padding="50dp" />
+
+</LinearLayout>

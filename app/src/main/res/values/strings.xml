@@ -1,0 +1,31 @@
+<resources>
+    <string name="app_name">Mobile Based Queueing System</string>
+    <string name="action_deletQueue">Delete Queue</string>
+    <string name="action_SignOut">Sign out</string>
+    <string name="action_LeaveQueue">Leave Queue</string>
+    <string name="welcome">Welcome, </string>
+    <string name="action_AboutUs">About Us</string>
+    <string name="login_using_gmail">Login Using Email/Gmail</string>
+    <string name="host">Host</string>
+    <string name="join">Join</string>
+    <string name="enter_queue_name">Enter Queue Name</string>
+    <string name="enter_queue_description">Enter Queue Description</string>
+    <string name="set_max_queue_limit">Set Max Queue Limit</string>
+    <string name="host_queue">Host Queue</string>
+    <string name="queue_name">Queue Name</string>
+    <string name="_00000">00000</string>
+    <string name="current">Current</string>
+    <string name="max">Max</string>
+    <string name="_0">0</string>
+    <string name="estimated_waiting_time">Estimated Waiting Time</string>
+    <string name="no_estimated_time_avaialable">No Estimated Time Avaialable</string>
+    <string name="scan_queues_near_me">Scan Queues Near Me</string>
+    <string name="scan">Scan</string>
+    <string name="current_token">Current Token</string>
+    <string name="next">Next</string>
+    <string name="client_details">Client Details</string>
+    <string name="client_name">Client Name</string>
+    <string name="client_email_com">client@email.com</string>
+    <string name="share_this_qr_code_with_clients">Share this QR Code With Clients</string>
+    <string name="enable_clients_to_join_via_bluetooth">Enable Clients To Join Via Bluetooth</string>
+</resources>
